@@ -1,0 +1,32 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "SENEC Connect einrichten",
+        "description": "Geben Sie Ihren SENEC.Connect API-Schlüssel ein. Die API sollte nicht häufiger als einmal pro Minute abgefragt werden.",
+        "data": {
+          "api_key": "API-Schlüssel",
+          "polling_interval": "Polling-Intervall (Sekunden)"
+        }
+      },
+      "devices": {
+        "title": "Geräte auswählen",
+        "description": "Wählen Sie die Geräte aus, die überwacht werden sollen ({devices} verfügbar).",
+        "data": {
+          "selected_devices": "Geräte"
+        }
+      }
+    },
+    "error": {
+      "empty_api_key": "API-Schlüssel ist erforderlich.",
+      "invalid_interval": "Polling-Intervall muss mindestens 60 Sekunden betragen.",
+      "invalid_auth": "Ungültige API-Zugangsdaten.",
+      "cannot_connect": "Verbindung zum SENEC Service fehlgeschlagen.",
+      "no_devices": "Keine Geräte gefunden.",
+      "no_selection": "Bitte mindestens ein Gerät auswählen."
+    },
+    "abort": {
+      "already_configured": "Diese Integration ist bereits konfiguriert."
+    }
+  }
+}

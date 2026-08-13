@@ -1,0 +1,32 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up SENEC Connect",
+        "description": "Enter your SENEC.Connect API key. The API should not be polled more than once per minute.",
+        "data": {
+          "api_key": "API key",
+          "polling_interval": "Polling interval (seconds)"
+        }
+      },
+      "devices": {
+        "title": "Select devices",
+        "description": "Select the devices to monitor ({devices} available).",
+        "data": {
+          "selected_devices": "Devices"
+        }
+      }
+    },
+    "error": {
+      "empty_api_key": "API key is required.",
+      "invalid_interval": "Polling interval must be at least 60 seconds.",
+      "invalid_auth": "Invalid API credentials.",
+      "cannot_connect": "Connection to SENEC service failed.",
+      "no_devices": "No devices found.",
+      "no_selection": "Please select at least one device."
+    },
+    "abort": {
+      "already_configured": "This integration is already configured."
+    }
+  }
+}

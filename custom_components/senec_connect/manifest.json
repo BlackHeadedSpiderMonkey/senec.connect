@@ -1,0 +1,11 @@
+{
+  "domain": "senec_connect",
+  "name": "SENEC Connect",
+  "version": "0.1.0",
+  "documentation": "https://github.com/senec-connect/ha-senec-connect",
+  "dependencies": [],
+  "requirements": ["aiohttp>=3.8.0"],
+  "codeowners": [],
+  "iot_class": "cloud_polling",
+  "config_flow": true
+}
