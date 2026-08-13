@@ -1,0 +1,19 @@
+meta {
+  name: Get Device Data - Meter Only
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/v1/systems/device-data/general?include=meter
+  body: none
+  auth: none
+}
+
+params:query {
+  include: meter
+}
+
+headers {
+  Ocp-Apim-Subscription-Key: {{apiKey}}
+}

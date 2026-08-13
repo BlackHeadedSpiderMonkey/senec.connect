@@ -1,0 +1,19 @@
+meta {
+  name: Get Device Data - Battery Only
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/v1/systems/device-data/general?include=battery
+  body: none
+  auth: none
+}
+
+params:query {
+  include: battery
+}
+
+headers {
+  Ocp-Apim-Subscription-Key: {{apiKey}}
+}

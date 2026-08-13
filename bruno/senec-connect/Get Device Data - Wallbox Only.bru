@@ -1,0 +1,19 @@
+meta {
+  name: Get Device Data - Wallbox Only
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/v1/systems/device-data/general?include=evse
+  body: none
+  auth: none
+}
+
+params:query {
+  include: evse
+}
+
+headers {
+  Ocp-Apim-Subscription-Key: {{apiKey}}
+}

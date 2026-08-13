@@ -72,6 +72,7 @@ class SenecApiClient:
                     )
 
                 data = await response.json()
+                _LOGGER.debug("API response type: %s, content: %s", type(data).__name__, data)
                 return [DeviceData.from_dict(item) for item in data]
 
         except (SenecAuthError, SenecApiError):

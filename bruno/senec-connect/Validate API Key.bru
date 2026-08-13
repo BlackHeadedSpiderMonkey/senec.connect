@@ -1,0 +1,23 @@
+meta {
+  name: Validate API Key
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/v1/systems/device-data/general?include=bessNameplate
+  body: none
+  auth: none
+}
+
+params:query {
+  include: bessNameplate
+}
+
+headers {
+  Ocp-Apim-Subscription-Key: {{apiKey}}
+}
+
+docs {
+  This is the same call the HA integration uses to validate the API key during config flow setup.
+}

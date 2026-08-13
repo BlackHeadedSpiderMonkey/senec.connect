@@ -1,0 +1,19 @@
+meta {
+  name: Get Device Data - All
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/v1/systems/device-data/general?include=battery,bessNameplate,meter,evse
+  body: none
+  auth: none
+}
+
+params:query {
+  include: battery,bessNameplate,meter,evse
+}
+
+headers {
+  Ocp-Apim-Subscription-Key: {{apiKey}}
+}

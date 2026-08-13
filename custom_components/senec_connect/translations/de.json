@@ -23,7 +23,8 @@
       "invalid_auth": "Ungültige API-Zugangsdaten.",
       "cannot_connect": "Verbindung zum SENEC Service fehlgeschlagen.",
       "no_devices": "Keine Geräte gefunden.",
-      "no_selection": "Bitte mindestens ein Gerät auswählen."
+      "no_selection": "Bitte mindestens ein Gerät auswählen.",
+      "unknown": "Ein unerwarteter Fehler ist aufgetreten. Prüfen Sie die Protokolle für Details."
     },
     "abort": {
       "already_configured": "Diese Integration ist bereits konfiguriert."

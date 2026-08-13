@@ -23,7 +23,8 @@
       "invalid_auth": "Invalid API credentials.",
       "cannot_connect": "Connection to SENEC service failed.",
       "no_devices": "No devices found.",
-      "no_selection": "Please select at least one device."
+      "no_selection": "Please select at least one device.",
+      "unknown": "An unexpected error occurred. Check the logs for details."
     },
     "abort": {
       "already_configured": "This integration is already configured."

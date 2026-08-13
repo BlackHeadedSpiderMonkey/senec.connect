@@ -372,7 +372,6 @@ class SenecSensorEntity(
             identifiers={(DOMAIN, self._serial_number)},
             manufacturer=manufacturer,
             model=model,
-            config_entry_id=self.coordinator.config_entry.entry_id,
         )
 
     @property
@@ -435,7 +434,6 @@ class SenecWallboxSensorEntity(
             model="Wallbox",
             name=f"Wallbox {self._wallbox_id}",
             via_device=(DOMAIN, self._serial_number),
-            config_entry_id=self.coordinator.config_entry.entry_id,
         )
 
     @property

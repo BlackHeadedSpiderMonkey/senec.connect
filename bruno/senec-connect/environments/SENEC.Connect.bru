@@ -1,0 +1,10 @@
+vars {
+  baseUrl: https://apim-eds-gwc-prod.azure-api.net/senec-connect
+  apiKey: {{apiKeyPrimary}}
+}
+vars:secret [
+  @description('Primary Key	')
+  apiKeyPrimary,
+  @description('Secondary Key')
+  apiKeySecondary
+]

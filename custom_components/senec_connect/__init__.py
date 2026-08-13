@@ -11,6 +11,7 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api_client import SenecApiClient
@@ -46,6 +47,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+
+    # Pre-register parent devices so via_device references work
+    device_registry = dr.async_get(hass)
+    for serial_number, device_data in coordinator.data.items():
+        manufacturer = "SENEC"
+        model = None
+        if device_data.bess_nameplate:
+            manufacturer = device_data.bess_nameplate.manufacturer
+            model = device_data.bess_nameplate.model
+        device_registry.async_get_or_create(
+            config_entry_id=entry.entry_id,
+            identifiers={(DOMAIN, serial_number)},
+            manufacturer=manufacturer,
+            model=model,
+        )
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 

@@ -13,11 +13,12 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api_client import SenecApiClient
-from .const import DEFAULT_POLLING_INTERVAL, DOMAIN, MIN_POLLING_INTERVAL
-from .exceptions import SenecAuthError, SenecConnectionError
+from .const import API_BASE_URL, DEFAULT_POLLING_INTERVAL, DOMAIN, MIN_POLLING_INTERVAL
+from .exceptions import SenecApiError, SenecAuthError, SenecConnectionError
 from .models import DeviceData
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ class SenecConnectConfigFlow(ConfigFlow, domain=DOMAIN):
         self._devices: list[DeviceData] = []
         self._api_key: str = ""
         self._polling_interval: int = DEFAULT_POLLING_INTERVAL
+        self._error_detail: str = ""
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -57,20 +59,34 @@ class SenecConnectConfigFlow(ConfigFlow, domain=DOMAIN):
             elif polling_interval < MIN_POLLING_INTERVAL:
                 errors["base"] = "invalid_interval"
             else:
-                # Set unique_id to the API key and abort if already configured
-                await self.async_set_unique_id(api_key)
-                self._abort_if_unique_id_configured()
-
-                # Validate API key by calling the API
-                session = async_get_clientsession(self.hass)
-                client = SenecApiClient(session=session, api_key=api_key)
-
                 try:
+                    # Validate API key by calling the API
+                    session = async_get_clientsession(self.hass)
+                    client = SenecApiClient(session=session, api_key=api_key)
+
+                    _LOGGER.debug("Validating API key against %s", API_BASE_URL)
                     devices = await client.async_validate_api_key()
-                except SenecAuthError:
+                    _LOGGER.debug("API validation returned %d devices", len(devices))
+                except SenecAuthError as err:
+                    _LOGGER.warning("Auth error during API validation: %s", err)
                     errors["base"] = "invalid_auth"
-                except SenecConnectionError:
+                except SenecConnectionError as err:
+                    _LOGGER.warning("Connection error during API validation: %s", err)
                     errors["base"] = "cannot_connect"
+                except Exception as err:
+                    _LOGGER.exception("Unexpected error during API validation: %s", err)
+                    # Create a persistent notification so we can see the error
+                    # even if logging doesn't work
+                    await self.hass.services.async_call(
+                        "persistent_notification",
+                        "create",
+                        {
+                            "title": "SENEC Connect Debug",
+                            "message": f"{type(err).__name__}: {err}",
+                            "notification_id": "senec_debug",
+                        },
+                    )
+                    errors["base"] = "unknown"
                 else:
                     if not devices:
                         errors["base"] = "no_devices"
@@ -107,6 +123,10 @@ class SenecConnectConfigFlow(ConfigFlow, domain=DOMAIN):
             if not selected:
                 errors["base"] = "no_selection"
             else:
+                # Set unique_id to prevent duplicate entries
+                await self.async_set_unique_id(self._api_key)
+                self._abort_if_unique_id_configured()
+
                 return self.async_create_entry(
                     title="SENEC Connect",
                     data={
@@ -128,9 +148,8 @@ class SenecConnectConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="devices",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_SELECTED_DEVICES): vol.All(
-                        vol.Coerce(list),
-                        [vol.In(device_options)],
+                    vol.Required(CONF_SELECTED_DEVICES): cv.multi_select(
+                        device_options
                     ),
                 }
             ),

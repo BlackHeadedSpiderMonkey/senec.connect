@@ -1,0 +1,19 @@
+meta {
+  name: Get Device Data - Nameplate Only
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/v1/systems/device-data/general?include=bessNameplate
+  body: none
+  auth: none
+}
+
+params:query {
+  include: bessNameplate
+}
+
+headers {
+  Ocp-Apim-Subscription-Key: {{apiKey}}
+}
