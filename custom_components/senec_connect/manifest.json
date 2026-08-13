@@ -1,7 +1,7 @@
 {
   "domain": "senec_connect",
   "name": "SENEC Connect",
-  "version": "0.1.2",
+  "version": "0.1.5",
   "documentation": "https://github.com/BlackHeadedSpiderMonkey/senec.connect",
   "dependencies": [],
   "requirements": ["aiohttp>=3.8.0"],
