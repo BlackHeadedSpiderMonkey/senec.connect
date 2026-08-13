@@ -1,0 +1,315 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "SENEC.Connect",
+        "description": "SENEC.Connect bietet Zugriff auf Gerätedaten von PV-Wechselrichtern, Stromspeichern und Wallboxen.",
+        "version": "1.0"
+    },
+    "servers": [
+        {
+            "url": "https://apim-eds-gwc-prod.azure-api.net/senec-connect"
+        }
+    ],
+    "paths": {
+        "/v1/systems/device-data/general": {
+            "get": {
+                "tags": [
+                    "system"
+                ],
+                "summary": "Retrieves an array of general device data",
+                "description": "Retrieves an array of general device data",
+                "operationId": "getDeviceData",
+                "parameters": [
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Comma-separated list of objects to include in the response.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "/v1/systems/device-data/general?include=battery,meter"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Response containing the general device data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GeneralDeviceData"
+                                    },
+                                    "description": "Data for all connected wallboxes."
+                                },
+                                "example": [
+                                    {
+                                        "battery": {
+                                            "state": 0,
+                                            "state_of_charge": 73,
+                                            "power": -1240,
+                                            "voltage": 52.1,
+                                            "current": -24.3
+                                        },
+                                        "bessNameplate": {
+                                            "manufacturer": "SENEC GmbH",
+                                            "model": "SENEC.Home E4 - 1ph 6 AC",
+                                            "serial_number": "v4-00012ff4",
+                                            "design_capacity": 100000,
+                                            "active_charge_power": 3000,
+                                            "active_discharge_power": 3000
+                                        },
+                                        "meter": {
+                                            "grid_power": -850.1,
+                                            "consumption": 1420.2,
+                                            "production": 570.6
+                                        },
+                                        "evse": [
+                                            {
+                                                "id": "WB-01",
+                                                "ev_connected": true,
+                                                "ev_charging": false,
+                                                "charging_power": 0
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Default response in case of an error",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas//Problem"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Default response in case of an error",
+                        "content": {
+                            "application/problem+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas//Problem"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "BatteryData": {
+                "required": [
+                    "state",
+                    "state_of_charge",
+                    "power",
+                    "voltage",
+                    "current"
+                ],
+                "type": "object",
+                "properties": {
+                    "state": {
+                        "type": "integer",
+                        "description": "Battery status (0 = OK, 1 = error)",
+                        "format": "int32",
+                        "example": 0,
+                        "x-extensible-enum": [
+                            0,
+                            1
+                        ]
+                    },
+                    "state_of_charge": {
+                        "type": "integer",
+                        "description": "Current state of charge in percentage (%)",
+                        "format": "int32",
+                        "example": 73
+                    },
+                    "power": {
+                        "type": "number",
+                        "description": "Current charging/discharging power (+ / −) in watt (W)",
+                        "format": "float",
+                        "example": -1240
+                    },
+                    "voltage": {
+                        "type": "number",
+                        "description": "Current battery voltage in volt (V)",
+                        "format": "float",
+                        "example": 52.1
+                    },
+                    "current": {
+                        "type": "number",
+                        "description": "Current battery current (+ / −) in ampere (A)",
+                        "format": "float",
+                        "example": -24.3
+                    }
+                },
+                "description": "Battery Data"
+            },
+            "BessNameplateData": {
+                "required": [
+                    "manufacturer",
+                    "model",
+                    "serial_number",
+                    "design_capacity",
+                    "active_charge_power",
+                    "active_discharge_power"
+                ],
+                "type": "object",
+                "properties": {
+                    "manufacturer": {
+                        "type": "string",
+                        "description": "Fixed: “SENEC GmbH”",
+                        "example": "SENEC GmbH"
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "The SENEC device model",
+                        "example": "SENEC.Home E4 - 1ph 6 AC"
+                    },
+                    "serial_number": {
+                        "type": "string",
+                        "description": "Serial number",
+                        "example": "v4-00012ff4"
+                    },
+                    "design_capacity": {
+                        "type": "integer",
+                        "description": "Installed net capacity (includes siblings) in watt hours (Wh)",
+                        "format": "int32",
+                        "example": 100000
+                    },
+                    "active_charge_power": {
+                        "type": "integer",
+                        "description": "Max charge power (includes siblings) in watt (W)",
+                        "format": "int32",
+                        "example": 3000
+                    },
+                    "active_discharge_power": {
+                        "type": "integer",
+                        "description": "Max discharge power (includes siblings) in watt (W)",
+                        "format": "int32",
+                        "example": 3000
+                    }
+                },
+                "description": "Data for the Battery Energy Storage System (BESS)"
+            },
+            "MeterData": {
+                "required": [
+                    "grid_power",
+                    "consumption",
+                    "production"
+                ],
+                "type": "object",
+                "properties": {
+                    "grid_power": {
+                        "type": "number",
+                        "description": "Grid power (+ from grid, − to grid) in watt (W).\n",
+                        "format": "float",
+                        "example": -850.1
+                    },
+                    "consumption": {
+                        "type": "number",
+                        "description": "Total electricity consumption in the house (without wallbox load) in watt (W).\n",
+                        "format": "float",
+                        "example": 1420.2
+                    },
+                    "production": {
+                        "type": "number",
+                        "description": "PV production in watt (W).\n",
+                        "format": "float",
+                        "example": 570.6
+                    }
+                },
+                "description": "Meter Data"
+            },
+            "WallboxData": {
+                "required": [
+                    "id",
+                    "ev_connected",
+                    "ev_charging",
+                    "charging_power"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Wallbox identifier",
+                        "example": "WB-01"
+                    },
+                    "ev_connected": {
+                        "type": "boolean",
+                        "description": "True if a vehicle is connected",
+                        "example": true
+                    },
+                    "ev_charging": {
+                        "type": "boolean",
+                        "description": "True if a vehicle is charging",
+                        "example": false
+                    },
+                    "charging_power": {
+                        "type": "number",
+                        "description": "Current charging power in volt-amperes (VA).\n",
+                        "format": "double",
+                        "example": 0
+                    }
+                },
+                "description": "Wallbox Data"
+            },
+            "EvseData": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/WallboxData"
+                },
+                "description": "Data for all connected wallboxes."
+            },
+            "GeneralDeviceData": {
+                "type": "object",
+                "properties": {
+                    "battery": {
+                        "$ref": "#/components/schemas/BatteryData"
+                    },
+                    "bessNameplate": {
+                        "$ref": "#/components/schemas/BessNameplateData"
+                    },
+                    "meter": {
+                        "$ref": "#/components/schemas/MeterData"
+                    },
+                    "evse": {
+                        "$ref": "#/components/schemas/EvseData"
+                    }
+                },
+                "description": "Contains all of the general device information.\nIf filtered, a partial response is returned.\n"
+            }
+        },
+        "securitySchemes": {
+            "apiKeyHeader": {
+                "type": "apiKey",
+                "name": "Ocp-Apim-Subscription-Key",
+                "in": "header"
+            },
+            "apiKeyQuery": {
+                "type": "apiKey",
+                "name": "subscription-key",
+                "in": "query"
+            }
+        }
+    },
+    "security": [
+        {
+            "apiKeyHeader": []
+        },
+        {
+            "apiKeyQuery": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "system",
+            "description": "Get device data via the System ID"
+        }
+    ]
+}
