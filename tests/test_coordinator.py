@@ -9,6 +9,8 @@ import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
+from homeassistant.exceptions import ConfigEntryAuthFailed
+
 from custom_components.senec_connect.api_client import SenecApiClient
 from custom_components.senec_connect.coordinator import SenecDataUpdateCoordinator
 from custom_components.senec_connect.exceptions import (
@@ -207,16 +209,16 @@ async def test_empty_api_response_raises_update_failed(
         await coordinator._async_update_data()
 
 
-async def test_auth_error_raises_update_failed(
+async def test_auth_error_raises_config_entry_auth_failed(
     coordinator: SenecDataUpdateCoordinator,
     mock_client: AsyncMock,
 ) -> None:
-    """Test that SenecAuthError is wrapped in UpdateFailed."""
+    """Test that SenecAuthError triggers reauth via ConfigEntryAuthFailed."""
     mock_client.async_get_device_data.side_effect = SenecAuthError(
         "Authentication failed with status 401"
     )
 
-    with pytest.raises(UpdateFailed, match="Authentication failed"):
+    with pytest.raises(ConfigEntryAuthFailed, match="Authentication failed"):
         await coordinator._async_update_data()
 
 

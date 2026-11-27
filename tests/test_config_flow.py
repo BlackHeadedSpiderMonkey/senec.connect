@@ -324,3 +324,67 @@ class TestAsyncStepDevices:
         assert len(flow._devices) == 2
         assert flow._devices[0].bess_nameplate.serial_number == "v4-00012ff4"
         assert flow._devices[1].bess_nameplate.serial_number == "v3-0000abcd"
+
+
+class TestNewApiKey:
+    """Tests for replacing the API key (reconfigure and reauth)."""
+
+    @pytest.fixture
+    def entry(self) -> MagicMock:
+        """Return an existing config entry with an outdated key."""
+        entry = MagicMock()
+        entry.entry_id = "entry-1"
+        entry.unique_id = "old-key"
+        entry.data = {CONF_SELECTED_DEVICES: ["v4-00012ff4"]}
+        return entry
+
+    async def _submit(self, flow, entry, step, **client_behaviour):
+        with patch(
+            "custom_components.senec_connect.config_flow.SenecApiClient"
+        ) as mock_client_cls, patch(
+            "custom_components.senec_connect.config_flow.async_get_clientsession"
+        ), patch.object(
+            flow, "_get_reauth_entry", return_value=entry
+        ), patch.object(
+            flow, "_get_reconfigure_entry", return_value=entry
+        ), patch.object(
+            flow, "_async_current_entries", return_value=[entry]
+        ), patch.object(
+            flow, "async_update_reload_and_abort", return_value={"type": "abort"}
+        ) as update:
+            mock_client = AsyncMock()
+            mock_client.async_validate_api_key.configure_mock(**client_behaviour)
+            mock_client_cls.return_value = mock_client
+            result = await getattr(flow, f"async_step_{step}")(
+                {CONF_API_KEY: " new-key "}
+            )
+        return result, update
+
+    @pytest.mark.parametrize("step", ["reconfigure", "reauth_confirm"])
+    async def test_valid_key_updates_entry(self, flow, entry, mock_devices, step):
+        """A valid key is stored together with the new unique_id."""
+        _, update = await self._submit(
+            flow, entry, step, return_value=mock_devices
+        )
+
+        update.assert_called_once_with(
+            entry, unique_id="new-key", data_updates={CONF_API_KEY: "new-key"}
+        )
+
+    async def test_rejected_key_shows_error(self, flow, entry):
+        """A rejected key keeps the entry unchanged."""
+        result, update = await self._submit(
+            flow, entry, "reconfigure", side_effect=SenecAuthError("nope")
+        )
+
+        assert result["errors"] == {"base": "invalid_auth"}
+        update.assert_not_called()
+
+    async def test_key_without_monitored_device_shows_error(self, flow, entry):
+        """A key for another account is not accepted."""
+        result, update = await self._submit(
+            flow, entry, "reconfigure", return_value=[]
+        )
+
+        assert result["errors"] == {"base": "devices_missing"}
+        update.assert_not_called()

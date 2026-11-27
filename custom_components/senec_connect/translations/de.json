@@ -15,6 +15,20 @@
         "data": {
           "selected_devices": "Geräte"
         }
+      },
+      "reconfigure": {
+        "title": "API-Schlüssel ändern",
+        "description": "Geben Sie Ihren neuen SENEC.Connect API-Schlüssel ein.",
+        "data": {
+          "api_key": "API-Schlüssel"
+        }
+      },
+      "reauth_confirm": {
+        "title": "API-Schlüssel ändern",
+        "description": "Geben Sie Ihren neuen SENEC.Connect API-Schlüssel ein.",
+        "data": {
+          "api_key": "API-Schlüssel"
+        }
       }
     },
     "error": {
@@ -24,10 +38,13 @@
       "cannot_connect": "Verbindung zum SENEC Service fehlgeschlagen.",
       "no_devices": "Keine Geräte gefunden.",
       "no_selection": "Bitte mindestens ein Gerät auswählen.",
-      "unknown": "Ein unerwarteter Fehler ist aufgetreten. Prüfen Sie die Protokolle für Details."
+      "unknown": "Ein unerwarteter Fehler ist aufgetreten. Prüfen Sie die Protokolle für Details.",
+      "devices_missing": "Mit diesem API-Schlüssel sind die überwachten Geräte nicht erreichbar."
     },
     "abort": {
-      "already_configured": "Diese Integration ist bereits konfiguriert."
+      "already_configured": "Diese Integration ist bereits konfiguriert.",
+      "reauth_successful": "API-Schlüssel aktualisiert.",
+      "reconfigure_successful": "API-Schlüssel aktualisiert."
     }
   }
 }

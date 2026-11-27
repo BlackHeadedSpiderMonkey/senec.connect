@@ -10,6 +10,7 @@ from datetime import timedelta
 import logging
 
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api_client import SenecApiClient
@@ -58,12 +59,14 @@ class SenecDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceData]]):
             device that is present in the API response.
 
         Raises:
-            UpdateFailed: If the API call fails or returns no data.
+            ConfigEntryAuthFailed: If the API rejects the API key.
+            UpdateFailed: If the API call fails otherwise or returns no data.
         """
         try:
             devices = await self.client.async_get_device_data()
         except SenecAuthError as err:
-            raise UpdateFailed(
+            # Makes Home Assistant start the reauth flow
+            raise ConfigEntryAuthFailed(
                 f"Authentication failed: {err}"
             ) from err
         except SenecApiError as err:

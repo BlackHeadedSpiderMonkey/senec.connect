@@ -15,6 +15,20 @@
         "data": {
           "selected_devices": "Devices"
         }
+      },
+      "reconfigure": {
+        "title": "Update API key",
+        "description": "Enter your new SENEC.Connect API key.",
+        "data": {
+          "api_key": "API key"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Update API key",
+        "description": "Enter your new SENEC.Connect API key.",
+        "data": {
+          "api_key": "API key"
+        }
       }
     },
     "error": {
@@ -24,10 +38,13 @@
       "cannot_connect": "Connection to SENEC service failed.",
       "no_devices": "No devices found.",
       "no_selection": "Please select at least one device.",
-      "unknown": "An unexpected error occurred. Check the logs for details."
+      "unknown": "An unexpected error occurred. Check the logs for details.",
+      "devices_missing": "The monitored devices are not accessible with this API key."
     },
     "abort": {
-      "already_configured": "This integration is already configured."
+      "already_configured": "This integration is already configured.",
+      "reauth_successful": "API key updated.",
+      "reconfigure_successful": "API key updated."
     }
   }
 }

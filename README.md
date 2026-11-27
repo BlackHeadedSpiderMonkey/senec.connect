@@ -42,9 +42,13 @@ Die Integration wird vollständig über die Home Assistant UI konfiguriert:
 2. **Polling-Intervall** — Aktualisierungsintervall in Sekunden (Standard: 60, Minimum: 60)
 3. **Geräteauswahl** — Wähle die SENEC-Geräte aus, die überwacht werden sollen
 
+### API Key ändern
+
+Unter **Einstellungen** → **Geräte & Dienste** → **SENEC Connect** im Menü (⋮) des Eintrags **Neu konfigurieren** wählen und den neuen Key eingeben. Lehnt die API den bisherigen Key ab, fordert Home Assistant auch selbst zur erneuten Authentifizierung auf. Geräte, Entitäten und Historie bleiben erhalten.
+
 ## Voraussetzungen
 
-- Home Assistant 2024.1.0 oder neuer
+- Home Assistant 2024.11.0 oder neuer
 - Ein gültiger SENEC.Connect API Key (Ocp-Apim-Subscription-Key)
 
 ## Versionierung

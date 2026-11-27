@@ -3,16 +3,20 @@
 Implements a two-step UI configuration:
 Step 1 (async_step_user): API key and polling interval input with validation
 Step 2 (async_step_devices): Device selection from discovered devices
+
+The API key of an existing entry can be replaced via reconfigure (started by
+the user) or reauth (started by Home Assistant when the API rejects the key).
 """
 
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping
 from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
@@ -155,4 +159,81 @@ class SenecConnectConfigFlow(ConfigFlow, domain=DOMAIN):
             ),
             errors=errors,
             description_placeholders={"devices": str(len(device_options))},
+        )
+
+    async def async_step_reauth(
+        self, entry_data: Mapping[str, Any]
+    ) -> ConfigFlowResult:
+        """Handle a rejected API key reported by the coordinator."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Ask for a new API key after authentication failed."""
+        return await self._async_step_new_api_key(
+            "reauth_confirm", self._get_reauth_entry(), user_input
+        )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Let the user replace the API key of an existing entry."""
+        return await self._async_step_new_api_key(
+            "reconfigure", self._get_reconfigure_entry(), user_input
+        )
+
+    async def _async_step_new_api_key(
+        self,
+        step_id: str,
+        entry: ConfigEntry,
+        user_input: dict[str, Any] | None,
+    ) -> ConfigFlowResult:
+        """Validate a new API key and store it in the existing entry."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            api_key = user_input.get(CONF_API_KEY, "").strip()
+
+            if not api_key:
+                errors["base"] = "empty_api_key"
+            elif any(
+                other.unique_id == api_key and other.entry_id != entry.entry_id
+                for other in self._async_current_entries()
+            ):
+                return self.async_abort(reason="already_configured")
+            else:
+                try:
+                    session = async_get_clientsession(self.hass)
+                    client = SenecApiClient(session=session, api_key=api_key)
+                    devices = await client.async_validate_api_key()
+                except SenecAuthError as err:
+                    _LOGGER.warning("Auth error during API validation: %s", err)
+                    errors["base"] = "invalid_auth"
+                except (SenecApiError, SenecConnectionError) as err:
+                    _LOGGER.warning("Connection error during API validation: %s", err)
+                    errors["base"] = "cannot_connect"
+                except Exception:
+                    _LOGGER.exception("Unexpected error during API validation")
+                    errors["base"] = "unknown"
+                else:
+                    serials = {
+                        device.bess_nameplate.serial_number
+                        for device in devices
+                        if device.bess_nameplate
+                    }
+                    # The new key must still give access to a monitored device
+                    if serials.isdisjoint(entry.data[CONF_SELECTED_DEVICES]):
+                        errors["base"] = "devices_missing"
+                    else:
+                        return self.async_update_reload_and_abort(
+                            entry,
+                            unique_id=api_key,
+                            data_updates={CONF_API_KEY: api_key},
+                        )
+
+        return self.async_show_form(
+            step_id=step_id,
+            data_schema=vol.Schema({vol.Required(CONF_API_KEY): str}),
+            errors=errors,
         )
